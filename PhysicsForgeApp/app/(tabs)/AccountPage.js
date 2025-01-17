@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import { AuthContext } from './_layout'; // Ensure this path is correct
 
 const { width, height } = Dimensions.get('window');
 
 export default function AccountPage() {
+  const { user } = useContext(AuthContext); // Get authenticated user
+  const [username, setUsername] = useState('Loading...');
+  const [quizScore, setQuizScore] = useState(null); // Store quiz1score
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) {
+        setUsername('Guest');
+        setQuizScore('N/A');
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'user_data', user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setUsername(data.username || 'No Username');
+          setQuizScore(data.quiz1score !== undefined ? `${data.quiz1score}%` : 'N/A');
+        } else {
+          setUsername('No Username');
+          setQuizScore('N/A');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUsername('Error');
+        setQuizScore('Error');
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
+
   return (
     <LinearGradient
       colors={['rgba(233, 26, 195, 0.60)', 'rgba(131, 15, 110, 0.80)']}
@@ -19,25 +56,25 @@ export default function AccountPage() {
       {/* User Info */}
       <View style={styles.userInfoContainer}>
         <View style={styles.userBox}>
-          <Text style={styles.userName}>User Name</Text>
+          <Text style={styles.userName}>{username}</Text>
         </View>
       </View>
 
       {/* Course and Progress */}
       <View style={styles.courseContainer}>
         <View style={styles.courseBox}>
-          <Text style={styles.courseName}>Course Name</Text>
+          <Text style={styles.courseName}>Muatan dan Gaya Listrik</Text>
           <View style={styles.progressBar}>
-            <View style={styles.progressIndicator50} />
+            <View style={[styles.progressIndicator, { width: quizScore !== 'N/A' ? quizScore : '0%' }]} />
           </View>
-          <Text style={styles.score}>Score: 50%</Text>
+          <Text style={styles.score}>Score: {quizScore}</Text>
         </View>
         <View style={styles.courseBox}>
-          <Text style={styles.courseName}>Course Name</Text>
+          <Text style={styles.courseName}>Coming Soon</Text>
           <View style={styles.progressBar}>
             <View style={styles.progressIndicator100} />
           </View>
-          <Text style={styles.score}>Score: 100%</Text>
+          <Text style={styles.score}>Score: N/A</Text>
         </View>
       </View>
     </LinearGradient>
