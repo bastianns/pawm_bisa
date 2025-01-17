@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -10,6 +10,7 @@ export default function CourseMuatanDanGayaListrik() {
   const router = useRouter();
 
   return (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
     <LinearGradient
       colors={['rgba(233, 26, 195, 0.60)', 'rgba(131, 15, 110, 0.80)']}
       style={styles.container}
@@ -48,6 +49,7 @@ export default function CourseMuatanDanGayaListrik() {
         </LinearGradient>
       </View>
     </LinearGradient>
+    </ScrollView>
   );
 }
 
