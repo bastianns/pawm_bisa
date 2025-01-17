@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from "../../firebaseConfig";
@@ -12,6 +12,7 @@ export default function AccountPage() {
   const { user, setUser } = useContext(AuthContext);
   const [username, setUsername] = useState('Loading...');
   const [quizScore, setQuizScore] = useState(null); // Store quiz1score
+  const [praktikumSubmitted, setPraktikumSubmitted] = useState(false); // Track praktikum1conclusion submission
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -31,6 +32,7 @@ export default function AccountPage() {
       if (!user) {
         setUsername('Guest');
         setQuizScore('N/A');
+        setPraktikumSubmitted(false);
         return;
       }
 
@@ -42,21 +44,34 @@ export default function AccountPage() {
           const data = userSnap.data();
           setUsername(data.username || 'No Username');
           setQuizScore(data.quiz1score !== undefined ? `${data.quiz1score}%` : 'N/A');
+          setPraktikumSubmitted(!!data.praktikum1conclusion); // Check if praktikum1conclusion exists
         } else {
           setUsername('No Username');
           setQuizScore('N/A');
+          setPraktikumSubmitted(false);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         setUsername('Error');
         setQuizScore('Error');
+        setPraktikumSubmitted(false);
       }
     };
 
     fetchUserData();
   }, [user]);
 
+  const calculateProgress = () => {
+    let progress = 0;
+    if (quizScore !== null) progress += 50; // 50% for completing the quiz
+    if (praktikumSubmitted) progress += 50; // 50% for submitting the conclusion
+    return progress;
+  };
+  
+  const progressPercentage = calculateProgress();
+
   return (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
     <LinearGradient
       colors={['rgba(233, 26, 195, 0.60)', 'rgba(131, 15, 110, 0.80)']}
       style={styles.container}
@@ -79,7 +94,7 @@ export default function AccountPage() {
         <View style={styles.courseBox}>
           <Text style={styles.courseName}>Muatan dan Gaya Listrik</Text>
           <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: quizScore !== 'N/A' ? quizScore : '0%' }]} />
+            <View style={[styles.progressIndicator, { width: `${progressPercentage}%` }]} />
           </View>
           <Text style={styles.score}>Score: {quizScore}</Text>
         </View>
@@ -92,6 +107,7 @@ export default function AccountPage() {
         </View>
       </View>
     </LinearGradient>
+    </ScrollView>
   );
 }
 
@@ -167,6 +183,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
     marginBottom: height * 0.02,
+  },
+  progressIndicator: {
+    height: '100%',
+    backgroundColor: '#FFFF00',
   },
   progressIndicator50: {
     width: '50%',
