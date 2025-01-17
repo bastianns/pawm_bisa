@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
