@@ -1,11 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, PanResponder, Dimensions, TextInput, Image, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, PanResponder, Dimensions, TextInput, Image, ScrollView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import { AuthContext } from './_layout'; // ✅ Keep the authentication context
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebaseConfig"; // Ensure correct path
 
 const { width, height } = Dimensions.get('window');
 
 export default function PagePraktikum() {
   // State management
+  const { user, setUser } = useContext(AuthContext);
+  const [conclusion, setConclusion] = useState('');
   const [negativeCharge, setNegativeCharge] = useState(0);
   const [handPosition, setHandPosition] = useState({
     x: width * 0.4,
@@ -21,6 +28,19 @@ export default function PagePraktikum() {
   const practiceAreaRef = useRef(null);
   const woolBoundsRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const practiceAreaBounds = useRef({ x: 0, y: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        console.log("✅ User is logged in:", currentUser.email, currentUser.uid);
+        setUser(currentUser);
+      } else {
+        console.log("❌ No user is currently logged in.");
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -117,6 +137,26 @@ export default function PagePraktikum() {
     practiceAreaBounds.current = { x, y, width: areaWidth, height: areaHeight };
   };
 
+  const saveConclusion = async () => {
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in to submit the conclusion.');
+      return;
+    }
+
+    console.log(`💾 Saving conclusion for user: ${user.uid}`);
+
+    try {
+      const userRef = doc(collection(db, 'user_data'), user.uid);
+      await setDoc(userRef, { praktikum1conclusion: conclusion }, { merge: true });
+
+      console.log('✅ Conclusion successfully saved to Firestore!');
+      Alert.alert('Success', 'Your conclusion has been saved.');
+    } catch (error) {
+      console.error('❌ Error saving conclusion:', error);
+      Alert.alert('Error', 'Failed to save conclusion.');
+    }
+  };
+
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
       <LinearGradient
@@ -207,12 +247,11 @@ export default function PagePraktikum() {
           placeholder="Explain what happened in the experiment..."
           multiline
           numberOfLines={4}
+          value={conclusion} // ✅ Store input value
+          onChangeText={setConclusion} // ✅ Update state
         />
 
-        <TouchableOpacity 
-          style={styles.submitButton}
-          onPress={() => console.log('Submitted')}
-        >
+        <TouchableOpacity style={styles.submitButton} onPress={saveConclusion}>
           <Text style={styles.submitText}>Submit</Text>
         </TouchableOpacity>
       </LinearGradient>
