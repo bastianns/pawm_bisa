@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebaseConfig"; // Ensure correct path
 import { AuthContext } from "./_layout"; // Import context from _layout.js
 
@@ -16,6 +16,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ Check if user is already logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        console.log("✅ User is already logged in:", currentUser.email, currentUser.uid);
+        setIsLoggedIn(true);
+        setUser(currentUser);
+      } else {
+        console.log("❌ No user is currently logged in.");
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password.");
@@ -25,7 +40,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("User signed in:", userCredential.user);
+      console.log("✅ User signed in:", userCredential.user.email, userCredential.user.uid);
 
       setIsLoggedIn(true);
       setUser(userCredential.user);
@@ -33,7 +48,7 @@ export default function LoginPage() {
       Alert.alert("Success", "Logged in successfully!");
       router.push("/page-course"); // Navigate to course page after login
     } catch (error) {
-      console.error("Login error:", error.message);
+      console.error("❌ Login error:", error.message);
       Alert.alert("Login Failed", error.message);
     }
     setLoading(false);
