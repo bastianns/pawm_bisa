@@ -2,15 +2,29 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { db, auth } from "../../firebaseConfig";
 import { AuthContext } from './_layout'; // Ensure this path is correct
+import { onAuthStateChanged } from "firebase/auth";
 
 const { width, height } = Dimensions.get('window');
 
 export default function AccountPage() {
-  const { user } = useContext(AuthContext); // Get authenticated user
+  const { user, setUser } = useContext(AuthContext);
   const [username, setUsername] = useState('Loading...');
   const [quizScore, setQuizScore] = useState(null); // Store quiz1score
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        console.log("✅ User is logged in:", currentUser.email, currentUser.uid);
+        setUser(currentUser);
+      } else {
+        console.log("❌ No user is currently logged in.");
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
