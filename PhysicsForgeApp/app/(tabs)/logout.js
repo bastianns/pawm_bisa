@@ -51,6 +51,7 @@ export default function LogoutPage() {
   };
 
   return (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
     <LinearGradient colors={["rgba(233, 26, 195, 0.60)", "rgba(131, 15, 110, 0.80)"]} style={styles.container}>
       <Text style={styles.headerText}>Logout</Text>
       <Text style={styles.subtitleText}>
@@ -68,6 +69,7 @@ export default function LogoutPage() {
         </TouchableOpacity>
       )}
     </LinearGradient>
+    </ScrollView>
   );
 }
 
