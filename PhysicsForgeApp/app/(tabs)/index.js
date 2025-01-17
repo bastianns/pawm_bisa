@@ -1,6 +1,8 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import 'react-native-gesture-handler';
+
 
 export default function Layout() {
   return (
