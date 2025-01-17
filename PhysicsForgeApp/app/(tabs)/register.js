@@ -1,9 +1,18 @@
 import React, { useState, useContext } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  Alert,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig"; // Ensure correct path
+import { collection, doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig"; // ✅ Ensure correct path
 import { AuthContext } from "./_layout"; // Import context from _layout.js
 
 const { width, height } = Dimensions.get("window");
@@ -12,12 +21,13 @@ export default function RegisterPage() {
   const router = useRouter();
   const { setIsLoggedIn, setUser } = useContext(AuthContext); // Get auth context
 
+  const [username, setUsername] = useState(""); // ✅ Re-added username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!email || !password) {
+    if (!username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields!");
       return;
     }
@@ -25,10 +35,15 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User registered:", userCredential.user);
+      const user = userCredential.user;
+      console.log("User registered:", user.uid, user.email);
+
+      // ✅ Save user data (including username) to Firestore
+      const userRef = doc(collection(db, "user_data"), user.uid);
+      await setDoc(userRef, { username: username });
 
       setIsLoggedIn(true);
-      setUser(userCredential.user);
+      setUser(user);
 
       Alert.alert("Success", "Registration successful!");
       router.push("/login"); // Navigate to login page after sign-up
@@ -43,6 +58,18 @@ export default function RegisterPage() {
     <LinearGradient colors={["rgba(233, 26, 195, 0.60)", "rgba(131, 15, 110, 0.80)"]} style={styles.container}>
       <Text style={styles.headerText}>Register</Text>
       <Text style={styles.subtitleText}>Create your account</Text>
+
+      {/* Username Input - Re-added */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.inputText}
+          placeholder="Username"
+          placeholderTextColor="#FFFF00"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+        />
+      </View>
 
       {/* Email Input */}
       <View style={styles.inputContainer}>
