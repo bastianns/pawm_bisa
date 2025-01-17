@@ -9,12 +9,12 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
   const [fontsLoaded, fontsError] = useFonts({
-    'Orbitron-Regular': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-Regular.ttf'),
-    'Orbitron-Bold': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-Bold.ttf'),
-    'Orbitron-ExtraBold': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-ExtraBold.ttf'),
-    'Orbitron-Black': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-Black.ttf'),
-    'Orbitron-Medium': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-Medium.ttf'),
-    'Orbitron-SemiBold': require('D:/PhysicsForgeApp/PhysicsForgeApp/assets/fonts/Orbitron-SemiBold.ttf')
+    'Orbitron-Regular': require('../../assets/fonts/Orbitron-Regular.ttf'),
+    'Orbitron-Bold': require('../../assets/fonts/Orbitron-Bold.ttf'),
+    'Orbitron-ExtraBold': require('../../assets/fonts/Orbitron-ExtraBold.ttf'),
+    'Orbitron-Black': require('../../assets/fonts/Orbitron-Black.ttf'),
+    'Orbitron-Medium': require('../../assets/fonts/Orbitron-Medium.ttf'),
+    'Orbitron-SemiBold': require('../../assets/fonts/Orbitron-SemiBold.ttf')
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="PageCourse"
+        name="page-course"
         options={{
           title: "Physics Forge",
           tabBarLabel: "Course",
@@ -85,6 +85,20 @@ export default function Layout() {
         options={{
           title: "Your Challenge Awaits!",
           tabBarLabel: "Exercise",
+        }}
+      />
+      <Tabs.Screen
+        name="praktikum"
+        options={{
+          title: "Charge and Stick!",
+          tabBarLabel: "Praktikum",
+        }}
+      />
+      <Tabs.Screen
+        name="AccountPage"
+        options={{
+          title: "Profile",
+          tabBarLabel: "Account",
         }}
       />
     </Tabs>
